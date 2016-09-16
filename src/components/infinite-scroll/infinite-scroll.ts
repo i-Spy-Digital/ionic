@@ -7,7 +7,7 @@ import { Content } from '../content/content';
  * @name InfiniteScroll
  * @description
  * The Infinite Scroll allows you to perform an action when the user
- * scrolls a specified distance from the bottom of the page.
+ * scrolls a specified distance from the bottom or top of the page.
  *
  * The expression assigned to the `infinite` event is called when
  * the user scrolls to the specified distance. When this expression
@@ -97,6 +97,7 @@ import { Content } from '../content/content';
 export class InfiniteScroll {
   _lastCheck: number = 0;
   _highestY: number = 0;
+  _position: string = POSITION_BOTTOM;
   _scLsn: Function;
   _thr: string = '15%';
   _thrPx: number = 0;
@@ -104,6 +105,21 @@ export class InfiniteScroll {
   _init: boolean = false;
 
   state: string = STATE_ENABLED;
+
+  /**
+   * @input {string} The position of the infinite scroll element.
+   * The value can be either `top` or `bottom`.
+   * Default is `bottom`.
+   */
+  @Input()
+  get position(): string {
+    return this._position;
+  }
+  set position(val: string) {
+    if (val === POSITION_TOP || val === POSITION_BOTTOM) {
+      this._position = val;
+    }
+  }
 
   /**
    * @input {string} The threshold distance from the bottom
@@ -167,15 +183,18 @@ export class InfiniteScroll {
     }
 
     let d = this._content.getContentDimensions();
+    let height = d.contentHeight;
+    
+    let threshold = this._thrPc ? (height * this._thrPc) : this._thrPx;
 
-    let reloadY = d.contentHeight;
-    if (this._thrPc) {
-      reloadY += (reloadY * this._thrPc);
-    } else {
-      reloadY += this._thrPx;
+    let distanceFromInfinite: number;
+
+    if (this._position === POSITION_BOTTOM) {
+      distanceFromInfinite = ((d.scrollHeight - infiniteHeight) - d.scrollTop) - height - threshold;
+    } else if (this._position === POSITION_TOP) {
+      distanceFromInfinite = d.scrollTop - infiniteHeight - threshold;
     }
-
-    let distanceFromInfinite = ((d.scrollHeight - infiniteHeight) - d.scrollTop) - reloadY;
+    
     if (distanceFromInfinite < 0) {
       this._zone.run(() => {
         if (this.state !== STATE_LOADING && this.state !== STATE_DISABLED) {
@@ -252,3 +271,6 @@ export class InfiniteScroll {
 const STATE_ENABLED = 'enabled';
 const STATE_DISABLED = 'disabled';
 const STATE_LOADING = 'loading';
+
+const POSITION_TOP = 'top';
+const POSITION_BOTTOM = 'bottom';
