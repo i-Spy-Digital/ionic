@@ -67,6 +67,29 @@ describe('Infinite Scroll', () => {
 
   });
 
+  describe('position', () => {
+
+    it('should default to bottom', () => {
+      expect(inf._position).toEqual('bottom');
+    });
+
+    it('should set to top', () => {
+      inf.position = 'top';
+      expect(inf._position).toEqual('top');
+    });
+
+    it('should set to bottom', () => {
+      inf.position = 'bottom';
+      expect(inf._position).toEqual('bottom');
+    });
+
+    it('should not set to anything else', () => {
+      inf.position = 'derp';
+      expect(inf._position).toEqual('bottom');
+    });
+
+  });
+
   describe('threshold', () => {
 
     it('should set by percent', () => {
